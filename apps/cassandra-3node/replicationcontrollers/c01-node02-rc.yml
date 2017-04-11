@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: c01-node02
+  labels:
+    app: c01-node02
+spec:
+  replicas: 1
+  selector:
+    app: c01-node02
+  template:
+    metadata:
+      labels:
+        app: c01-node02
+    spec: 
+      containers:
+      - name: c01-node02-container
+        image: cduchesne/k8s-cassandra:2.2-avidns-graphite-opscenter-remotejmx
+        imagePullPolicy: Always
+        command: ["/docker-entrypoint.sh","cassandra","-f","-Dcassandra.metricsReporterConfigFile=metrics-reporter-config.yaml"]
+        resources:
+          limits:
+            cpu: "20"
+            memory: 128Gi
+          requests:
+            cpu: "10"
+            memory: 128Gi
+        env:
+        - name: CASSANDRA_SEEDS
+          value: "c01-node01.default.svc.cluster.local" 
+        - name: CASSANDRA_CLUSTER_NAME
+          value: "cassandra01"
+        - name: CASSANDRA_NODE_NAME
+          value: "c01-node02"
+        - name: CASSANDRA_DC
+          value: "DFW"
+        - name: CASSANDRA_RACK
+          value: "rack1"
+        - name: LOCAL_JMX
+          value: "no"
+        - name: GRAPHITE_HOST
+          value: "graphite.default.svc.cluster.local"
+        - name: OPSCENTER_HOST
+          value: "opscenter.default.svc.cluster.local"
+        - name: AVI_DNS_VIP
+          value: "10.50.100.250"
+        - name: AVI_DOMAIN_NAME
+          value: "default.k8s.democluster.com."
+        livenessProbe:
+          tcpSocket:
+            port: 7000
+          initialDelaySeconds: 600
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /var/lib/cassandra
+          name: c01-node02
+      volumes:
+      - name: c01-node02
+        flexVolume:
+          driver: rexray/flexrex
+          fsType: xfs
+          options:
+            volumeID: c01-node02
+            service: scaleio
+            forceAttach: "true"
+            forceAttachDelay: "20"

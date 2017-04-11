@@ -1,0 +1,10 @@
+counter_cache_save_period  
+counter_cache_size_in_mb 
+inter_dc_stream_throughput_outbound_megabits_per_sec  
+internode_compression 
+key_cache_size_in_mb  
+memtable_offheap_space_in_mb  
+row_cache_save_period 
+row_cache_size_in_mb  
+rpc_max_threads  
+saved_caches_directory 
